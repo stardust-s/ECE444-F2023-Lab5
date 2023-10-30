@@ -30,6 +30,7 @@ flask_wtf
 datetime
 itsdangerous
 jinja2
+json
 werkzeug
 wtforms
 flask_migrate
