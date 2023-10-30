@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Flask, g, render_template, request, session, flash, redirect, url_for
+from flask import Flask, g, render_template, request, session, flash, redirect, url_for, abort
 
 # configuration
 DATABASE = "flaskr.db"
@@ -80,6 +80,19 @@ def index():
     entries = cur.fetchall()
     return render_template('index.html', entries=entries)
 
+@app.route('/add', methods=['POST'])
+def add_entry():
+    """Add new post to database."""
+    if not session.get('logged_in'):
+        abort(401)
+    db = get_db()
+    db.execute(
+        'insert into entries (title, text) values (?, ?)',
+        [request.form['title'], request.form['text']]
+    )
+    db.commit()
+    flash('New entry was successfully posted')
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run()
