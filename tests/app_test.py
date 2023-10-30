@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from project.app import app
+from project import setup
 
 
 def test_index():
@@ -12,4 +13,5 @@ def test_index():
 
 
 def test_database():
+    setup.setup()
     assert Path("flaskr.db").is_file()
