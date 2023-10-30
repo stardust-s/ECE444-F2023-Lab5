@@ -35,3 +35,5 @@ werkzeug
 wtforms
 flask_migrate
 sqlite3
+flake8
+black
