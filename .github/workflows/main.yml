@@ -1,0 +1,61 @@
+name: Format Python Code and submit PR
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+
+jobs:
+  check-format:
+    if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Check out the code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Install black (Python formatter)
+      - name: Install black
+        run: pip install black
+
+      # Run black to format the code
+      - name: Format Python code
+        run: black .
+
+      # Commit changes
+      - name: Commit formatted code
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add -u
+          git commit -m "Apply black formatting" || echo "No changes to commit"
+      
+      # Push changes to a new branch
+      - name: Push changes
+        run: |
+          BRANCH_NAME=formatted-$(date +'%Y%m%d%H%M%S')
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+
+      # Create Pull Request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: ${{ steps.push_changes.outputs.BRANCH_NAME }}
+          title: "Apply black formatting"
+          body: "This PR applies black formatting to Python code"
+          labels: formatting
+          assignees: your-github-username # Replace with your GitHub username or others as needed
+          token: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, no need to create one
